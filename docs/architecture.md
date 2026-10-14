@@ -56,3 +56,23 @@ measured and stored in config).
 - Target closer than a minimum distance → stop.
 - No new fusion output within a watchdog period → motors off.
 - A physical kill switch on the robot.
+
+## Radar-driven constraints (from RD-03D spec, see `hardware/rd-03d.md`)
+
+- **Sensor roles:** radar covers only ±60° azimuth, so audio is the wide-angle "search" sensor and
+  radar is the narrow, precise "track" sensor. If the user leaves the radar's view, fusion goes to
+  `SEARCHING` and control turns toward the audio bearing until radar re-acquires.
+- **Power:** radar needs a clean 5 V (≤ 100 mV ripple, ≥ 200 mA peak). Motors on the same battery
+  create large ripple → give the radar its own LDO/regulator, separate from the motor supply.
+  Power tree: battery → motor driver; battery → 5 V regulator → radar; → 3.3 V → ESP32-S3 + mics.
+- **UART:** 3.3 V levels, direct to ESP32-S3; 256000 bps default. Use the hardware UART with a
+  driver RX buffer; parse in a task.
+- **Resolution:** 0.75 m range resolution — two people at similar distance may merge into one
+  target. Fusion should use angle as well as range, and audio to break ties.
+- **Moving platform risk:** the module is designed for a fixed wall mount. On a moving robot,
+  static objects move relative to the radar and may appear as targets; vibration also hurts.
+  Test the radar on the moving base early (week 3–4), before building fusion on top of it.
+- **Mounting:** rigid, unobstructed front, no metal near the antenna, optional metal shield behind
+  (back lobe sees the robot's own moving parts). Mount height vs ±30° elevation — check floor clutter.
+- **Angle sign:** depends on how the module is rotated when mounted; record the mapping to the
+  robot frame (positive = left) once the mount is fixed.

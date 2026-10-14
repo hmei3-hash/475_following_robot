@@ -1,27 +1,59 @@
 # RD-03D 24 GHz Radar — Key Notes
 
-Ai-Thinker RD-03D: 24 GHz FMCW mmWave module (S5KM312CL SoC, 1 TX / 2 RX).
-Outputs tracked targets over UART: x, y, distance, angle, speed.
+Source: Ai-Thinker *Rd-03D Specification* V1.0.0 (2023-08-31).
+Ai-Thinker RD-03D: 24 GHz FMCW mmWave module (S5KM312CL SoC, 1 TX / 2 RX, max sweep bandwidth 0.25 GHz).
+Reports multiple tracked targets over UART.
 
-> TODO (Hongyi): fill in from the official datasheet / protocol document — do not guess these values.
+## Electrical
+
+| Item | Value | Note |
+| --- | --- | --- |
+| Supply | 5 V single supply | |
+| Current | 92 mA average; supply must handle ≥ 200 mA peak | |
+| Supply ripple | ≤ 100 mV | LDO recommended; DC-DC only with ripple control |
+| I/O level | 3.3 V | direct connect to ESP32-S3, no level shifter |
+| VOL / VOH | ≤ 0.33 V / ≥ 2.7 V | |
+| Interface | UART | default **256000 bps** |
+| Reference circuit | 100 nF + 10 µF on 5 V; 10 kΩ pull-ups to 3.3 V on TX and RX | 10–100 Ω series resistors on I/O suggested for EMI/ESD |
+| Connector | 1×4P, 1.25 mm pitch: 5V, GND, TX, RX | also 7 pads: RX TX GND DEBUG DP DM 5V |
+| Size | 15.0 × 44.0 mm | |
+
+## Sensing
 
 | Item | Value |
 | --- | --- |
-| Supply voltage | TODO |
-| UART logic level | TODO (confirm 3.3 V compatible with ESP32-S3) |
-| Baud rate | TODO |
+| Max range | 8 m (vendor open-field test, wall-mounted at 1.5–2 m) |
+| Range resolution | 0.75 m |
+| Ranging accuracy | 0.15 m |
+| Field of view | azimuth ±60°, elevation ±30° |
+| Angle reference | 0° = antenna-plane normal; sign of "positive angle" depends on mounting orientation (spec Fig. 9 a/b) |
+| Configurable (vendor tool) | detection range, reporting interval, target retention time |
+
+## Not in this spec — still TODO
+
+The specification does **not** include the UART data protocol. Get Ai-Thinker's RD-03D protocol
+document and fill in:
+
+| Item | Value |
+| --- | --- |
 | Frame header / footer bytes | TODO |
 | Max targets per frame | TODO |
 | Field encoding (sign bit, units) | TODO |
-| Update rate | TODO |
-| Detection range | TODO |
-| Field of view (azimuth) | TODO |
-| Single- vs multi-target mode command | TODO |
+| Report rate | TODO |
+| Single/multi-target mode commands | TODO |
+| Minimum detection range | TODO (measure) |
+
+## Installation notes from the spec
+
+- Antenna faces the scene with nothing in front; no metal parts near the antenna.
+- Mount rigidly — vibration degrades detection.
+- The back lobe can see moving objects behind the radar; a metal shield/backplane behind it helps.
+- Moving non-human objects (fans, curtains, plants) and large strong reflectors degrade results.
+- Keep away from other 24 GHz radars.
 
 ## Things to measure on the bench
 
-- Range error vs true distance (0.5 m, 1 m, 2 m, 3 m …).
-- Angle error vs true angle across the field of view.
-- What happens with two people at similar range.
-- Static clutter (walls, furniture): does it appear as targets?
-- Effect of the robot's own motion and vibration.
+- Range and angle error at known positions (0.5–3 m, every 15°).
+- Two people closer than 0.75 m in range: one target or two?
+- Behavior while the radar itself is moving (on the robot) — see `docs/architecture.md` risks.
+- Static clutter (walls, furniture) and floor reflections at the robot's mount height.
