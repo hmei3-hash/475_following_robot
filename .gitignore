@@ -1,0 +1,21 @@
+# Build outputs (ESP-IDF / PlatformIO / Arduino)
+build/
+.pio/
+sdkconfig.old
+*.bin
+*.elf
+*.map
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Large logs (commit small samples only)
+*.wav
