@@ -19,3 +19,6 @@ __pycache__/
 
 # Large logs (commit small samples only)
 *.wav
+
+# Wi-Fi / OTA credentials (copy secrets.h.example)
+secrets.h
