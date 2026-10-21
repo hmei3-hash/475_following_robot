@@ -20,6 +20,13 @@ stable IDs for targets across frames so fusion can follow "the same person".
    smooth position (moving average or simple filter). Output a stable ID per track.
 6. **Publish** — latest `radar_frame_t` with timestamp.
 
+## Bench sketch
+
+[`bench/rd03d_uart_test/`](bench/rd03d_uart_test/) — standalone Arduino-ESP32 sketch:
+UART at 256000 baud on GPIO2/GPIO1, byte-by-byte header/payload/tail parser, sign-bit decode,
+optional multi-target config, prints x/y/speed/distance/angle per target. Use it for bring-up
+and to record frames for the parser unit test.
+
 ## Design decisions to make
 
 - Raw frame parsing vs. relying on the module's own tracking IDs.
@@ -33,6 +40,8 @@ stable IDs for targets across frames so fusion can follow "the same person".
 - Logic level of the module's UART vs ESP32-S3 3.3 V I/O.
 - Empty target slots must not be treated as a target at (0, 0).
 - Static reflections (walls) may show up as targets.
+- The RD-03D frame is x = lateral, y = forward, angle positive to the right; the robot frame
+  (`docs/interfaces.md`) is x forward, y left, angle positive to the left. Convert in one place.
 
 ## Bench tests
 
@@ -44,7 +53,7 @@ stable IDs for targets across frames so fusion can follow "the same person".
 
 ## TODO
 
-- [ ] Fill in `docs/hardware/rd-03d.md` from the datasheet/protocol doc
+- [x] Fill in `docs/hardware/rd-03d.md` frame format (report rate and min range still to measure)
 - [ ] UART bring-up
 - [ ] Parser
 - [ ] Unit conversion + frame

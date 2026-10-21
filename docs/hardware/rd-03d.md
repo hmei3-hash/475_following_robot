@@ -29,18 +29,24 @@ Reports multiple tracked targets over UART.
 | Angle reference | 0° = antenna-plane normal; sign of "positive angle" depends on mounting orientation (spec Fig. 9 a/b) |
 | Configurable (vendor tool) | detection range, reporting interval, target retention time |
 
-## Not in this spec — still TODO
+## UART data protocol
 
-The specification does **not** include the UART data protocol. Get Ai-Thinker's RD-03D protocol
-document and fill in:
+The specification does not include the protocol; the values below are what the bench sketch
+(`firmware/radar/bench/rd03d_uart_test/`) implements. Re-check against Ai-Thinker's RD-03D
+protocol document.
 
 | Item | Value |
 | --- | --- |
-| Frame header / footer bytes | TODO |
-| Max targets per frame | TODO |
-| Field encoding (sign bit, units) | TODO |
-| Report rate | TODO |
-| Single/multi-target mode commands | TODO |
+| Frame | `AA FF 03 00` · 24-byte payload · `55 CC` (30 bytes) |
+| Max targets per frame | 3, 8 bytes each |
+| Per-target fields | x (int16), y (int16), speed (int16), distance resolution (uint16), all little-endian |
+| Units | x, y in mm; speed in cm/s; resolution in mm |
+| Sign encoding | sign bit, not two's complement: bit15 = 1 → positive, 0 → negative; magnitude = low 15 bits |
+| Empty slot | all 8 bytes zero |
+| Axes | x = lateral, y = forward (radar's own frame) |
+| Default mode at power-on | single-target |
+| Multi-target commands | enter config `FD FC FB FA 04 00 FF 00 01 00 04 03 02 01` → multi-target `FD FC FB FA 02 00 90 00 04 03 02 01` → exit config `FD FC FB FA 02 00 FE 00 04 03 02 01` |
+| Report rate | TODO (measure) |
 | Minimum detection range | TODO (measure) |
 
 ## Installation notes from the spec
